@@ -28,6 +28,10 @@ class DegreeView:
             try:
                 insert_degree(degree_name, degree_level)
                 messagebox.showinfo("Success", "Degree added successfully")
+                # Clean the entry
+                self.degree_name_entry.delete(0, tk.END)
+                self.degree_level_entry.delete(0, tk.END)
+
             except Exception as e:
                 messagebox.showerror("Error", str(e))
         else:

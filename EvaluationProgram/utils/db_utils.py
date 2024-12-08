@@ -24,3 +24,26 @@ def fetch_degrees():
     conn.close()
     return degrees
 
+# Insert the course info to the database
+def insert_course(course_id, course_name):
+    query = "INSERT INTO Course (course_id, course_name) VALUES (%s, %s)"
+    values = (course_id, course_name)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+# Get the course info from the database
+def fetch_courses():
+    query = "SELECT course_id, course_name FROM Course"
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query)
+    courses = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return courses

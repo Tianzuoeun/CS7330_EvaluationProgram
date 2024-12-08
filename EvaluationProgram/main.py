@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from views.degree_view import DegreeView
-#from views.course_view import CourseView
+from views.course_view import CourseView
 
 def main():
     root = tk.Tk()
@@ -10,7 +10,7 @@ def main():
 
     # GuideButton
     tk.Button(root, text="Manage Degrees", width=20, command=DegreeView).pack(pady=10)
-    #tk.Button(root, text="Manage Courses", width=20, command=CourseView).pack(pady=10)
+    tk.Button(root, text="Manage Courses", width=20, command=CourseView).pack(pady=10)
 
     root.mainloop()
 
