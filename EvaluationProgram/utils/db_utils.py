@@ -47,3 +47,75 @@ def fetch_courses():
     cursor.close()
     conn.close()
     return courses
+
+# Insert the instructor info to the database
+def insert_instructor(instructor_id, instructor_name):
+    query = "INSERT INTO Instructor (instructor_id, instructor_name) VALUES (%s, %s)"
+    values = (instructor_id, instructor_name)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+# Get the instructor info from the database
+def fetch_instructor():
+    query = "SELECT instructor_id, instructor_name FROM Instructor"
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query)
+    instructors = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return instructors
+
+# Insert the section info to the database
+def insert_section(section_id, semester, year, student_num, course_id, instructor_id):
+    query = "INSERT INTO Section (section_id, semester, year, student_num, course_id, instructor_id) VALUES (%s, %s, %s, %s, %s, %s)"
+    values = (section_id, semester, year, student_num, course_id, instructor_id)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+# Get the section info from the database
+def fetch_sections():
+    query = "SELECT section_id, semester, year, student_num, course_id, instructor_id FROM Section"
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query)
+    sections = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return sections
+
+# Insert the goal info to the database
+def insert_goal(goal_code, description, degree_name, degree_level):
+    query = "INSERT INTO Goal (goal_code, description, degree_name, degree_level) VALUES (%s, %s, %s, %s)"
+    values = (goal_code, description, degree_name, degree_level)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+# Get the goal info from the database
+def fetch_goals():
+    query = "SELECT goal_code, description, degree_name, degree_level FROM Goal"
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query)
+    goals = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return goals
