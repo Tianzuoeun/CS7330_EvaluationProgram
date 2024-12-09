@@ -134,3 +134,56 @@ def fetch_goals():
     return goals
 
 # -------------------------------------------------------------
+
+# Get info of semester, year, instructor ID and the evaluation status from Database
+def fetch_sections_with_evaluations(semester, year, instructor_id):
+    query = """
+        SELECT Section.section_id, Section.course_id, 
+               CASE 
+                   WHEN Evaluation.grade_A_count IS NOT NULL THEN 'Complete'
+                   ELSE 'Incomplete'
+               END AS evaluation_status
+        FROM Section
+        LEFT JOIN Evaluation 
+        ON Section.section_id = Evaluation.section_id 
+        AND Section.course_id = Evaluation.course_id
+        AND Section.semester = Evaluation.semester
+        AND Section.year = Evaluation.year
+        WHERE Section.semester = %s AND Section.year = %s AND Section.instructor_id = %s
+    """
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(query, (semester, year, instructor_id))
+    sections = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return sections
+
+# Function to insert or renew the evaluation info/status
+def insert_or_update_evaluation(course_id, section_id, semester, year,
+                                goal_code, degree_name, degree_level,
+                                evaluation_type, grade_A_count, grade_B_count,
+                                grade_C_count, grade_F_count, improvement_sug):
+    query = """
+        INSERT INTO Evaluation (evaluation_id, course_id, section_id, semester, 
+        year, goal_code, degree_name, degree_level, evaluation_type, grade_A_count, 
+        grade_B_count, grade_C_count, grade_F_count, improvement_sug)
+        VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE 
+            evaluation_type = VALUES(evaluation_type),
+            grade_A_count = VALUES(grade_A_count),
+            grade_B_count = VALUES(grade_B_count),
+            grade_C_count = VALUES(grade_C_count),
+            grade_F_count = VALUES(grade_F_count),
+            improvement_sug = VALUES(improvement_sug)
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, (course_id, section_id, semester, year, goal_code,
+                           degree_name, degree_level, evaluation_type, grade_A_count,
+                           grade_B_count, grade_C_count, grade_F_count, improvement_sug))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+# -------------------------------------------------------------
