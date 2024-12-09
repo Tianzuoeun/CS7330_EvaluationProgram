@@ -24,6 +24,7 @@ def fetch_degrees():
     conn.close()
     return degrees
 
+# -------------------------------------------------------------
 # Insert the course info to the database
 def insert_course(course_id, course_name):
     query = "INSERT INTO Course (course_id, course_name) VALUES (%s, %s)"
@@ -47,3 +48,21 @@ def fetch_courses():
     cursor.close()
     conn.close()
     return courses
+
+# User can delete a course by entering course id
+def delete_course(course_id):
+    query = "DELETE FROM Course WHERE course_id = %s"
+    values = (course_id,)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    rows_deleted = cursor.rowcount  # get the affected rows
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return rows_deleted
+
+
+# -------------------------------------------------------------
+#
