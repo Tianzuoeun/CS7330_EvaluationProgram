@@ -134,11 +134,10 @@ def fetch_goals():
     return goals
 
 # -------------------------------------------------------------
-
 # Get info of semester, year, instructor ID and the evaluation status from Database
 def fetch_sections_with_evaluations(semester, year, instructor_id):
     query = """
-        SELECT Section.section_id, Section.course_id, 
+        SELECT Section.section_id, Section.course_id, Evaluation.evaluation_id,
                CASE 
                    WHEN Evaluation.grade_A_count IS NOT NULL THEN 'Complete'
                    ELSE 'Incomplete'
@@ -160,7 +159,7 @@ def fetch_sections_with_evaluations(semester, year, instructor_id):
     return sections
 
 # Function to insert or renew the evaluation info/status
-def insert_or_update_evaluation(course_id, section_id, semester, year,
+def insert_or_update_evaluation(evaluation_id, course_id, section_id, semester, year,
                                 goal_code, degree_name, degree_level,
                                 evaluation_type, grade_A_count, grade_B_count,
                                 grade_C_count, grade_F_count, improvement_sug):
@@ -168,8 +167,9 @@ def insert_or_update_evaluation(course_id, section_id, semester, year,
         INSERT INTO Evaluation (evaluation_id, course_id, section_id, semester, 
         year, goal_code, degree_name, degree_level, evaluation_type, grade_A_count, 
         grade_B_count, grade_C_count, grade_F_count, improvement_sug)
-        VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ON DUPLICATE KEY UPDATE 
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+            evaluation_id = VALUES(evaluation_id), 
             evaluation_type = VALUES(evaluation_type),
             grade_A_count = VALUES(grade_A_count),
             grade_B_count = VALUES(grade_B_count),
@@ -179,7 +179,7 @@ def insert_or_update_evaluation(course_id, section_id, semester, year,
     """
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute(query, (course_id, section_id, semester, year, goal_code,
+    cursor.execute(query, (evaluation_id, course_id, section_id, semester, year, goal_code,
                            degree_name, degree_level, evaluation_type, grade_A_count,
                            grade_B_count, grade_C_count, grade_F_count, improvement_sug))
     conn.commit()
