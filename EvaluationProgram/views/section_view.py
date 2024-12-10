@@ -5,7 +5,7 @@ from utils.db_utils import insert_section, fetch_sections
 class SectionView:
     def __init__(self):
         self.window = tk.Toplevel()
-        self.window.title("Mange Sections")
+        self.window.title("Manage Sections")
         self.window.geometry("400x300")
 
         # Insert the section info

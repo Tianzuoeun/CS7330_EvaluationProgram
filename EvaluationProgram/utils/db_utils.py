@@ -119,3 +119,138 @@ def fetch_goals():
     cursor.close()
     conn.close()
     return goals
+
+def fetch_courses_by_degree(degree_name, degree_level):
+    query = "SELECT course_id, course_name FROM Course WHERE degree_name = %s AND degree_level = %s"
+    values = (degree_name, degree_level)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    courses = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return courses
+
+def fetch_sections_by_degree_in_time_range(degree_name, degree_level, degree_year_minimum, degree_year_maximum, degree_semester_minimum, degree_semester_maximum):
+    query = "Select section_id, semester, year, student_num, course_id, instructor_id FROM Section WHERE course_id = %s AND year >= %s AND year <=%s"
+    courses = fetch_courses_by_degree(degree_name, degree_level)
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    sections = []
+    
+    for course in courses:
+        values = (course.course_id, degree_year_minimum, degree_year_maximum)
+        cursor.execute(query, values)
+        sections_query = cursor.fetchall()
+        sections.extend(sections_query)
+        
+    cursor.close()
+    conn.close()
+
+    if (degree_semester_minimum == "Summer"):
+        for section in sections[::-1]:
+            if section.year == degree_year_minimum and section.semester == "Spring":
+                sections.remove(section)
+    if (degree_semester_minimum == "Fall"):
+        for section in sections[::-1]:
+            if section.year == degree_year_minimum and section.semester == "Spring":
+                sections.remove(section)
+            if section.year == degree_year_minimum and section.semester == "Summer":
+                sections.remove(section)
+    if (degree_semester_maximum == "Summer"):
+        for section in sections[::-1]:
+            if section.year == degree_year_maximum and section.semester == "Fall":
+                sections.remove(section)
+    if (degree_semester_maximum == "Spring"):
+        for section in sections[::-1]:
+            if section.year == degree_year_maximum and section.semester == "Summer":
+                sections.remove(section)
+            if section.year == degree_year_maximum and section.semester == "Fall":
+                sections.remove(section)
+
+    sorted_sections = sorted(sections, key=lambda section: (section.year))
+    return sorted_sections
+
+def fetch_goals_by_degree(degree_name, degree_level):
+    query = "SELECT goal_code, description, degree_name, degree_level FROM Goal WHERE degree_name = %s AND degree_level = %s"
+    values = (degree_name, degree_level)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    goals = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return goals
+
+def fetch_sections_by_course_in_time_range(course_id, degree_year_minimum, degree_year_maximum, degree_semester_minimum, degree_semester_maximum):
+    query = "Select section_id, semester, year, student_num, course_id, instructor_id FROM Section WHERE course_id = %s AND year >= %s AND year <=%s"
+    values = (course_id, degree_year_minimum, degree_year_maximum)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    sections = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    if (degree_semester_minimum == "Summer"):
+        for section in sections[::-1]:
+            if section.year == degree_year_minimum and section.semester == "Spring":
+                sections.remove(section)
+    if (degree_semester_minimum == "Fall"):
+        for section in sections[::-1]:
+            if section.year == degree_year_minimum and section.semester == "Spring":
+                sections.remove(section)
+            if section.year == degree_year_minimum and section.semester == "Summer":
+                sections.remove(section)
+    if (degree_semester_maximum == "Summer"):
+        for section in sections[::-1]:
+            if section.year == degree_year_maximum and section.semester == "Fall":
+                sections.remove(section)
+    if (degree_semester_maximum == "Spring"):
+        for section in sections[::-1]:
+            if section.year == degree_year_maximum and section.semester == "Summer":
+                sections.remove(section)
+            if section.year == degree_year_maximum and section.semester == "Fall":
+                sections.remove(section)
+
+    sorted_sections = sorted(sections, key=lambda section: (section.year))
+    return sorted_sections
+
+def fetch_sections_by_instructor_in_time_range(instructor_id, degree_year_minimum, degree_year_maximum, degree_semester_minimum, degree_semester_maximum):
+    query = "Select section_id, semester, year, student_num, course_id, instructor_id FROM Section WHERE instructor_id = %s  AND year >= %s AND year <=%s"
+    values = (instructor_id, degree_year_minimum, degree_year_maximum)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    sections = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    if (degree_semester_minimum == "Summer"):
+        for section in sections[::-1]:
+            if section.year == degree_year_minimum and section.semester == "Spring":
+                sections.remove(section)
+    if (degree_semester_minimum == "Fall"):
+        for section in sections[::-1]:
+            if section.year == degree_year_minimum and section.semester == "Spring":
+                sections.remove(section)
+            if section.year == degree_year_minimum and section.semester == "Summer":
+                sections.remove(section)
+    if (degree_semester_maximum == "Summer"):
+        for section in sections[::-1]:
+            if section.year == degree_year_maximum and section.semester == "Fall":
+                sections.remove(section)
+    if (degree_semester_maximum == "Spring"):
+        for section in sections[::-1]:
+            if section.year == degree_year_maximum and section.semester == "Summer":
+                sections.remove(section)
+            if section.year == degree_year_maximum and section.semester == "Fall":
+                sections.remove(section)
+
+    sorted_sections = sorted(sections, key=lambda section: (section.year))
+    return sorted_sections

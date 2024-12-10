@@ -5,7 +5,7 @@ from utils.db_utils import insert_course, fetch_courses
 class CourseView:
     def __init__(self):
         self.window = tk.Toplevel()
-        self.window.title("Mange Courses")
+        self.window.title("Manage Courses")
         self.window.geometry("400x300")
 
         # Insert the course info

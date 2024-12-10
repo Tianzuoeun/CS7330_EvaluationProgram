@@ -5,7 +5,7 @@ from utils.db_utils import insert_goal, fetch_goals
 class GoalView:
     def __init__(self):
         self.window = tk.Toplevel()
-        self.window.title("Mange Goals")
+        self.window.title("Manage Goals")
         self.window.geometry("400x300")
 
         # Insert the goal info

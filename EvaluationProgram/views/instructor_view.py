@@ -5,7 +5,7 @@ from utils.db_utils import insert_instructor, fetch_instructors
 class InstructorView:
     def __init__(self):
         self.window = tk.Toplevel()
-        self.window.title("Mange Instructors")
+        self.window.title("Manage Instructors")
         self.window.geometry("400x300")
 
         # Insert the instructor info
