@@ -144,7 +144,8 @@ def fetch_sections_by_degree_in_time_range(degree_name, degree_level, degree_yea
         values = (course.course_id, degree_year_minimum, degree_year_maximum)
         cursor.execute(query, values)
         sections_query = cursor.fetchall()
-        sections.extend(sections_query)
+        for section_query in sections_query:
+            sections.extend(section_query)
         
     cursor.close()
     conn.close()
@@ -254,3 +255,80 @@ def fetch_sections_by_instructor_in_time_range(instructor_id, degree_year_minimu
 
     sorted_sections = sorted(sections, key=lambda section: (section.year))
     return sorted_sections
+
+def fetch_evaluation_info_by_semester(semester):
+    query = "Select section_id, semester, year, student_num, course_id, instructor_id FROM Section WHERE semester = %s"
+    values = (semester)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    sections = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    eval_info = "No Info"
+
+    for section in sections:
+        eval_info = fetch_evaluation_status_by_section(section)
+        section.eval_info = eval_info
+
+    return sections
+
+def fetch_evaluation_status_by_section(section_id):
+    query = "Select evaluation_id, evaluation_type, grade_A_count, grade_B_count, grade_C_count, grade_F_count, improvement_sug, course_id, section_id, semester, year, goal_code, degree_name, degree_level FROM Evaluation WHERE section_id = %s"
+    values = (section_id)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    evaluations = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    evaluation = evaluations[0]
+    evaluation_status = "Full Info"
+
+    if evaluation.improvement_sug == None:
+        evaluation_status = "No Improvement Suggestion"
+    if evaluation.evaluation_type == None or evaluation.grade_A_count == None or evaluation.grade_B_count == None or evaluation.grade_C_count == None or evaluation.grade_F_count == None:
+        evaluation_status = "Partial Info"
+    if evaluation.evaluation_type == None and evaluation.grade_A_count == None and evaluation.grade_B_count == None and evaluation.grade_C_count == None and evaluation.grade_F_count == None and evaluation.improvement_sug == None:
+        evaluation_status = "No Info"
+
+    return evaluation_status
+
+def fetch_sections_by_percent_passing(percentage):
+    query = "Select evaluation_id, evaluation_type, grade_A_count, grade_B_count, grade_C_count, grade_F_count, improvement_sug, course_id, section_id, semester, year, goal_code, degree_name, degree_level FROM Evaluation"
+    percent = float(percentage)
+    f_max = 1-percent
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query)
+    evaluations = cursor.fetchall()
+
+    sections = []
+
+    for evaluation in evaluations:
+        if (f_max <= (evaluation.grade_F_count)/(evaluation.grade_A_count + evaluation.grade_B_count + evaluation.grade_C_count + evaluation.grade_F_count)):
+            sectionFetch = fetch_sections_by_section_id(evaluation.section_id)
+            section = sectionFetch[0]
+            sections.extend(section)
+    
+    cursor.close()
+    conn.close()
+
+    return sections
+
+def fetch_sections_by_section_id(section_id):
+    query = "Select section_id, semester, year, student_num, course_id, instructor_id FROM Section WHERE section_id = %s"
+    values = (section_id)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    sections = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return sections

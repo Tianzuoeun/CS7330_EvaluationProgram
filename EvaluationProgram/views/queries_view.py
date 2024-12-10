@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from utils.db_utils import fetch_courses_by_degree, fetch_sections_by_degree_in_time_range, fetch_goals_by_degree, fetch_sections_by_course_in_time_range, fetch_sections_by_instructor_in_time_range
+from utils.db_utils import fetch_courses_by_degree, fetch_sections_by_degree_in_time_range, fetch_goals_by_degree, fetch_sections_by_course_in_time_range, fetch_sections_by_instructor_in_time_range, fetch_evaluation_info_by_semester, fetch_sections_by_percent_passing
 
 class QueriesView:
     def __init__(self):
@@ -98,7 +98,17 @@ class QueriesView:
         # Query by goal
         tk.Button(self.window, text="Show All Sections", command=self.show_all_courses_by_goal).pack(pady=10)
 
+        tk.Label(self.window, text="Semester: ").pack(pady=5)
+        self.evaluation_semester_entry = tk.Entry(self.window)
+        self.evaluation_semester_entry.pack()
+
+        tk.Label(self.window, text="Percent Passing: ").pack(pady=5)
+        self.evaluation_percentage_entry = tk.Entry(self.window)
+        self.evaluation_percentage_entry.pack()
+
         # Query by evaluation
+        tk.Button(self.window, text="Show Evaluation Info", command=self.show_all_evaluation_info_by_semester).pack(pady=10)
+        tk.Button(self.window, text="Show Sections With Percent Passing", command=self.show_sections_by_percent_passing).pack(pady=10)
 
     def show_all_courses(self):
         degree_name = self.degree_name_entry.get()
@@ -213,6 +223,40 @@ class QueriesView:
                     messagebox.showinfo("Courses", result)
                 else:
                     messagebox.showinfo("Courses", "No courses found.")
+
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+        else:
+            messagebox.showwarning("Input Error", "Please fill out the fields!")
+    
+    def show_all_evaluation_info_by_semester(self):
+        evaluation_semester = self.evaluation_semester_entry.get()
+
+        if evaluation_semester:
+            try:
+                sections = fetch_evaluation_info_by_semester(evaluation_semester)
+                if sections:
+                    result = "\n".join([f"{section_id} - {semester} - {year} - {student_num} - {course_id} - {instructor_id} - {eval_info}" for section_id, semester, year, student_num, course_id, instructor_id, eval_info in sections])
+                    messagebox.showinfo("Sections", result)
+                else:
+                    messagebox.showinfo("Sections", "No Sections found.")
+
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+        else:
+            messagebox.showwarning("Input Error", "Please fill out the fields!")
+
+    def show_sections_by_percent_passing(self):
+        percentage = self.percentage_entry.get()
+
+        if percentage:
+            try:
+                sections = fetch_sections_by_percent_passing(percentage)
+                if sections:
+                    result = "\n".join([f"{section_id} - {semester} - {year} - {student_num} - {course_id} - {instructor_id}" for section_id, semester, year, student_num, course_id, instructor_id in sections])
+                    messagebox.showinfo("Sections", result)
+                else:
+                    messagebox.showinfo("Sections", "No sections found.")
 
             except Exception as e:
                 messagebox.showerror("Error", str(e))
