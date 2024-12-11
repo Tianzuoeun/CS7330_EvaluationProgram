@@ -7,6 +7,7 @@ from views.instructor_view import InstructorView
 from views.section_view import SectionView
 from views.goal_view import GoalView
 from views.evaluation_view import EvaluationView
+from views.queries_view import QueriesView
 
 def main():
     root = tk.Tk()
@@ -20,6 +21,7 @@ def main():
     tk.Button(root, text="Manage Sections", width=20, command=SectionView).pack(pady=10)
     tk.Button(root, text="Manage Goals", width=20, command=GoalView).pack(pady=10)
     tk.Button(root, text="Evaluation", width=20, command=EvaluationView).pack(pady=10)
+    tk.Button(root, text="Manage Queries", width=20, command=QueriesView).pack(pady=10)
 
     root.mainloop()
 

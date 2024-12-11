@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
-from utils.db_utils import insert_course, fetch_courses, delete_course
+from utils.db_utils import insert_course, fetch_courses, delete_course, insert_degree_course
 
 class CourseView:
     def __init__(self):
         self.window = tk.Toplevel()
-        self.window.title("Mange Courses")
+        self.window.title("Manage Courses")
         self.window.geometry("600x600")
 
         # Insert the course info
@@ -17,8 +17,18 @@ class CourseView:
         tk.Label(self.window, text="Course Name: ").pack(pady=5)
         self.course_name_entry = tk.Entry(self.window)
         self.course_name_entry.pack()
+
+        # Insert degree info
+        tk.Label(self.window, text="Degree Name: ").pack(pady=5)
+        self.degree_name_entry = tk.Entry(self.window)
+        self.degree_name_entry.pack()
+        tk.Label(self.window, text="Degree Level: ").pack(pady=5)
+        self.degree_level_entry = tk.Entry(self.window)
+        self.degree_level_entry.pack()
+
         # Add course Button
         tk.Button(self.window, text="Add Course", command=self.add_course).pack(pady=10)
+
         # Show the Courses in Treeview Table
         self.course_tree = ttk.Treeview(self.window, columns=("ID", "Name"), show="headings")
         self.course_tree.heading("ID", text="CourseID")
@@ -44,14 +54,30 @@ class CourseView:
     def add_course(self):
         course_id = self.course_id_entry.get()
         course_name = self.course_name_entry.get()
+        degree_name = self.degree_name_entry.get()
+        degree_level = self.degree_level_entry.get()
 
-        if course_id and course_name:
+        if course_id and course_name and degree_name and degree_level:
             try:
-                insert_course(course_id, course_name)
-                messagebox.showinfo("Success", "Course added successfully!")
+                # Check if the course is duplicated
+                existing_courses = fetch_courses()
+                if any(course[0] == course_id for course in existing_courses):
+                    # If there is the same course in the table, add it to Degree_Course Table only
+                    insert_degree_course(degree_name, degree_level, course_id)
+                    messagebox.showinfo("Success",
+                                        f"Course '{course_id}' linked to degree '{degree_name} ({degree_level})'.")
+                else:
+                    # If there is no same course, create a new one and connect it with degree
+                    insert_course(course_id, course_name)
+                    insert_degree_course(degree_name, degree_level, course_id)
+                    messagebox.showinfo("Success",
+                                        f"Course '{course_id}' added and linked to degree '{degree_name} ({degree_level})'.")
+
                 # Clean the entry
                 self.course_id_entry.delete(0, tk.END)
                 self.course_name_entry.delete(0, tk.END)
+                self.degree_name_entry.delete(0, tk.END)
+                self.degree_level_entry.delete(0, tk.END)
                 # Renew the course list
                 self.show_courses()
             except Exception as e:
@@ -94,3 +120,5 @@ class CourseView:
 
         else:
             messagebox.showwarning("Inpute Error", "Please enter a Course ID to delete")
+
+

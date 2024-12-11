@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from utils.db_utils import fetch_sections_with_evaluations, insert_or_update_evaluation
+from utils.db_utils import fetch_sections_with_evaluations, insert_or_update_evaluation,check_evaluation_id
 
 class EvaluationView:
     def __init__(self):
@@ -73,23 +73,38 @@ class EvaluationView:
         year = self.year_entry.get()
         instructor_id = self.instructor_entry.get()
 
-        if semester and year and instructor_id:
-            try:
-                sections = fetch_sections_with_evaluations(semester, year, instructor_id)
-                for row in self.section_tree.get_children():
-                    self.section_tree.delete(row)
-                for section in sections:
-                    self.section_tree.insert("", tk.END, values=(section["section_id"], section["course_id"], section["evaluation_status"]))
-
-                    # If section has existing evaluation, load Evaluation ID
-                    if section["evaluation_id"]:
-                        self.evaluation_id_entry.delete(0, tk.END)
-                        self.evaluation_id_entry.insert(0, section["evaluation_id"])
-
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to load sections: {str(e)}")
-        else:
+        if not semester or not year or not instructor_id:
             messagebox.showwarning("Input Error", "Please fill out all fields!")
+            return
+
+        try:
+            sections = fetch_sections_with_evaluations(semester, year, instructor_id)
+            # Clear the content
+            for row in self.section_tree.get_children():
+                self.section_tree.delete(row)
+
+            # fill out the table
+            for section in sections:
+                evaluation_status = section['evaluation_status']
+                missing_fields = []
+
+                # Check which sections are NULL
+                if not section.get('evaluation_type'):
+                    missing_fields.append('Evaluation Type')
+                if not section.get('improvement_sug'):
+                    missing_fields.append('Improvement Suggestions')
+
+                if missing_fields:
+                    evaluation_status += f" (Missing: {', '.join(missing_fields)})"
+
+                self.section_tree.insert("", tk.END, values=(
+                    section['section_id'],
+                    section['course_id'],
+                    evaluation_status
+                ))
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load sections: {str(e)}")
 
     def is_valid_int(self, value):
         try:
@@ -144,25 +159,33 @@ class EvaluationView:
             messagebox.showwarning("Input Error", "Grades must be integers.")
             return
 
-        if not all([goal_code, degree_name, degree_level, evaluation_type, grade_A_count, grade_B_count, grade_C_count,
-                    grade_F_count]):
-            messagebox.showwarning("Input Error", "Please fill out all fields!")
+        # Make sure required fields have been filled out
+        required_fields = [goal_code, degree_name, degree_level, grade_A_count, grade_B_count, grade_C_count,
+                           grade_F_count]
+        if not all(required_fields):
+            messagebox.showwarning("Input Error", "Please fill out all required fields!")
             return
 
         try:
-            if evaluation_id:
-                # Update existing evaluation
-                insert_or_update_evaluation(evaluation_id, course_id, section_id, semester, year, goal_code,
-                                            degree_name,
-                                            degree_level, evaluation_type, grade_A_count, grade_B_count,
-                                            grade_C_count, grade_F_count, improvement_sug)
-            else:
-                # Insert new evaluation
-                insert_or_update_evaluation(None, course_id, section_id, semester, year, goal_code, degree_name,
-                                            degree_level, evaluation_type, grade_A_count, grade_B_count,
-                                            grade_C_count, grade_F_count, improvement_sug)
+            # Check if the evaluation id is existed
+            if evaluation_id and check_evaluation_id(evaluation_id):
+                # Ask if the user want to renew the evaluation that has already existed
+                update_choice = messagebox.askyesno(
+                    "Duplicate Evaluation",
+                    f"Evaluation ID {evaluation_id} already exists. Do you want to update it?"
+                )
+                if not update_choice:
+                    return  # If user not renewing, return
+
+            # submit/renew the evaluation
+            insert_or_update_evaluation(
+                evaluation_id, course_id, section_id, semester, year, goal_code,
+                degree_name, degree_level, evaluation_type, grade_A_count, grade_B_count,
+                grade_C_count, grade_F_count, improvement_sug
+            )
             messagebox.showinfo("Success", "Evaluation submitted successfully!")
-            self.clear_evaluation_fields()
+            self.clear_evaluation_fields()  # Clear the fields
+            self.load_sections()  # refresh the table
         except Exception as e:
             messagebox.showerror("Error", f"Failed to submit evaluation: {str(e)}")
 
