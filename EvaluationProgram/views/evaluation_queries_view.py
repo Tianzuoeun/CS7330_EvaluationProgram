@@ -8,7 +8,7 @@ class EvaluationQueriesView:
     def __init__(self):
         self.window = tk.Toplevel()
         self.window.title("Manage Evaluation Queries")
-        self.window.geometry("400x1300")
+        self.window.geometry("400x500")
 
         # Query by evaluation
         # Query evaluation status

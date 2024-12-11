@@ -86,7 +86,7 @@ class QueriesView:
         tk.Label(self.window, text="Degree Level: ").pack(pady=5)
         self.goal_degree_level_entry = tk.Entry(self.window)
         self.goal_degree_level_entry.pack()
-        tk.Button(self.window, text="Show All Sections", command=self.show_all_courses_by_goal).pack(pady=10)
+        tk.Button(self.window, text="Show All Courses", command=self.show_all_courses_by_goal).pack(pady=10)
 
     def show_all_courses(self):
         degree_name = self.degree_name_entry.get()
@@ -193,8 +193,8 @@ class QueriesView:
 
     def show_all_courses_by_goal(self):
         goal_code = self.goal_code_entry.get()
-        degree_name = self.degree_name_entry.get()
-        degree_level = self.degree_level_entry.get()
+        degree_name = self.goal_degree_name_entry.get()
+        degree_level = self.goal_degree_level_entry.get()
         if goal_code and degree_name and degree_level:
             try:
                 courses = fetch_courses_by_degree(degree_name, degree_level)
